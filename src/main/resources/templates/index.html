@@ -43,17 +43,29 @@
 		</div>
 	</nav>
 
+	
+
 	<div style="min-height: 88vh;" class="container-fluid">
 		<div style="min-height: 8vh;"></div>
 		<div class="row">
 			<div class="container-fluid col-md-3">
-				<p>total: [[${total_cases}]]</p>
-				<p>new: [[${new_cases}]] </p>
-				<p>active: [[${active_cases}]] </p>
-				<p>critical: [[${active_cases}]] </p>
-				<p>recovered: [[${recovered_cases}]] </p>
-				<p>deaths: [[${total_deaths}]] </p>
-				<p>new: [[${new_deaths}]] </p>
+				<h3> [[${country_name}]] </h3>
+				<br>
+				<div class="container">
+					<p>total: [[${total_cases}]]</p>
+					<p>new: [[${new_cases}]] </p>
+					<p>active: [[${active_cases}]] </p>
+					<p>critical: [[${active_cases}]] </p>
+					<p>recovered: [[${recovered_cases}]] </p>
+					<p>deaths: [[${total_deaths}]] </p>
+					<p>new: [[${new_deaths}]] </p>
+					<p><label for="startDate">Start Date:</label> <input type="date" id="startDate"></p>
+					<p><label for="stopDate">Stop Date:</label> <input type="date" id="stopDate"></p>
+					<script>
+						document.getElementById('startDate').value = "[[${start_date}]]";
+						document.getElementById('stopDate').value = "[[${stop_date}]]";
+					</script>
+				</div>
 			</div>
 			
 			<div class="container-fluid col-md-3">
@@ -92,7 +104,7 @@ const myChart1 = new Chart(ctx1, {
 				</script>
 			</div>
 		</div>
-			<div class="container-fluid">
+			<div class="container">
 				<canvas id="myChart2"></canvas>
 				
 				<script>
