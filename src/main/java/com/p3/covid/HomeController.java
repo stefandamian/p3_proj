@@ -17,62 +17,29 @@ public class HomeController {
     public String index(final Model model) throws Exception{
         CovidUtilsClient client = new CovidUtilsClient();
 
-        StatsEntry var = client.getcountryStats("all");
-        Integer totalCases = var.getTotalCases();
-        Integer newCases = var.getNewCases();
-        Integer criticalCases = var.getCriticalCases();
-        Integer recoveredCases = var.getRecoveredCases();
-        Integer activeCases = var.getActiveCases();
-        Integer totalDeaths = var.getTotalDeaths();
-        Integer newDeaths = var.getNewDeaths();
-
-        model.addAttribute("total_cases", totalCases);
-        model.addAttribute("new_cases", newCases);
-        model.addAttribute("critical_cases", criticalCases);
-        model.addAttribute("recovered_cases", recoveredCases);
-        model.addAttribute("active_cases", activeCases);
-        model.addAttribute("total_deaths", totalDeaths);
-        model.addAttribute("new_deaths", newDeaths);
-        
-        String startDate = LocalDate.now().plusDays(-30).toString();
-        String stopDate = LocalDate.now().toString();
-
-        ArrayList<StatsEntry> arr = client.getcountryStatsTimeline("all", startDate, stopDate);
-        ArrayList<String> days = new ArrayList<String>();
-        ArrayList<Integer> arrNewCases = new ArrayList<Integer>();
-        ArrayList<Integer> arrNewDeaths = new ArrayList<Integer>();
-        DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyyMMdd");
-        for (StatsEntry entry : arr) {
-            if (entry != null){
-                days.add(entry.getDate().format(formater));
-                arrNewCases.add(entry.getNewCases());
-                arrNewDeaths.add(entry.getNewDeaths());
-            }
-        }
-        System.out.println(arr.size());
-        model.addAttribute("start_date", startDate);
-        model.addAttribute("stop_date", stopDate);
-        model.addAttribute("days", days);
-        model.addAttribute("arr_new_cases", arrNewCases);
-        model.addAttribute("arr_new_deaths", arrNewDeaths);
-
+        List<String> validCountries = client.getCountries();
+        model.addAttribute("countries", validCountries);
         //*/
 
         return "index";
     }
 
     @GetMapping("/stats")
-    public String country_stats(@RequestParam(name="country") String country, final Model model) throws Exception{
+    public String country_stats(@RequestParam(name="country") String country, @RequestParam(name="startDate", required = false) String startDate, 
+    @RequestParam(name="stopDate", required = false) String stopDate, final Model model) throws Exception{
+        
         CovidUtilsClient client = new CovidUtilsClient();
 
-        List<String> valid_countries = client.getCountries();
-        
-        if(valid_countries.stream().anyMatch(country::equalsIgnoreCase)){
-            model.addAttribute("country_name", country);
+        if (country.equals("all")){
+            model.addAttribute("country_name", "World Wide");
         }
         else{
-            return "base";
-        }
+            List<String> valid_countries = client.getCountries();
+            if(!valid_countries.stream().anyMatch(country::equalsIgnoreCase)){
+                return "index";
+            }
+            model.addAttribute("country_name", country);
+        }        
         
         StatsEntry var = client.getcountryStats(country);
         Integer totalCases = var.getTotalCases();
@@ -91,13 +58,18 @@ public class HomeController {
         model.addAttribute("total_deaths", totalDeaths);
         model.addAttribute("new_deaths", newDeaths);
         
-        String startDate = LocalDate.now().plusDays(-70).toString();
-        String stopDate = LocalDate.now().toString();
+        if (startDate == null){
+            startDate = LocalDate.now().plusDays(-30).toString();
+        }
+        if (stopDate == null){
+            stopDate = LocalDate.now().toString();
+        }
 
         ArrayList<StatsEntry> arr = client.getcountryStatsTimeline(country, startDate, stopDate);
         ArrayList<String> days = new ArrayList<String>();
         ArrayList<Integer> arrNewCases = new ArrayList<Integer>();
         ArrayList<Integer> arrNewDeaths = new ArrayList<Integer>();
+        ArrayList<Integer> arrActiveCases = new ArrayList<Integer>();
         DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyyMMdd");
         Integer number = 0;
         for (StatsEntry entry : arr) {
@@ -105,6 +77,7 @@ public class HomeController {
                 days.add(entry.getDate().format(formater));
                 arrNewCases.add(entry.getNewCases());
                 arrNewDeaths.add(entry.getNewDeaths());
+                arrActiveCases.add(entry.getActiveCases());
                 number++;
             }
         }
@@ -115,9 +88,10 @@ public class HomeController {
         model.addAttribute("days", days);
         model.addAttribute("arr_new_cases", arrNewCases);
         model.addAttribute("arr_new_deaths", arrNewDeaths);
+        model.addAttribute("arr_active_cases", arrActiveCases);
 
         //*/
-        return "index";
+        return "stats";
     }
 
 }

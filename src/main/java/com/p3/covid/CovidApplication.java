@@ -44,7 +44,8 @@ public class CovidApplication {
 	public static void main(String[] args) {
 		Thread myThread = new ThreadWithGlobals();
 		myThread.start();
-		SpringApplication.run(CovidApplication.class, args);
+		SpringApplication application = new SpringApplication(CovidApplication.class);
+		application.run(args);
 	}
 
 }

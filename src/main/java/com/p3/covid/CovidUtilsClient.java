@@ -80,7 +80,7 @@ class StatsEntry{
 
 public class CovidUtilsClient {
     private OkHttpClient client;
-    private final static Integer SLEEP_TIME = 1100;
+    //private final static Integer SLEEP_TIME = 1100;
 
     CovidUtilsClient(){
         client = new OkHttpClient();

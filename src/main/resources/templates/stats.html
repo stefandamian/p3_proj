@@ -1,0 +1,228 @@
+<!DOCTYPE HTML>
+<html>
+<head> 
+<title>Covid Statistics</title> 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+	
+</head>
+<body>
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+		<div class="container-fluid">
+		  <a class="navbar-brand" href="/">CovStats</a>
+		  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		  </button>
+		  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+			  <li class="nav-item">
+				<a class="nav-link active" aria-current="page" href="/">Countries</a>
+			  </li>
+			  <li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+				  Favorite
+				</a>
+				<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+				  <li><a class="dropdown-item" href="/stats?country=Romania">Romania</a></li>
+				  <li><hr class="dropdown-divider"></li>
+				  <li><a class="dropdown-item" href="/stats?country=All">World Wide</a></li>
+				</ul>
+			  </li>
+			</ul>
+		  </div>
+		</div>
+	</nav>
+
+	
+
+	<div style="min-height: 88vh;" class="container-fluid">
+		<div style="min-height: 8vh;"></div>
+		<div class="row">
+			<div class="container-fluid col-md-3">
+				<h3> [[${country_name}]] </h3>
+				<br>
+				<div class="container">
+					<p>total: [[${total_cases}]]</p>
+					<p>new: [[${new_cases}]] </p>
+					<p>active: [[${active_cases}]] </p>
+					<p>critical: [[${active_cases}]] </p>
+					<p>recovered: [[${recovered_cases}]] </p>
+					<p>deaths: [[${total_deaths}]] </p>
+					<p>new: [[${new_deaths}]] </p>
+					<form method="GET" action="/stats" id="formCountry">
+						<input type="hidden" name="country" th:value="${country_name}">
+						<p><label for="startDate">Start Date:</label> <input type="date" name="startDate" id="startDate"></p>
+						<p><label for="stopDate">Stop Date:</label> <input type="date" name="stopDate" id="stopDate"></p>
+						<p><button type="submit" id="btnSubmit" class="btn btn-primary">Reload stats</button></p>
+						<p id="waitingTimeInput"></p>
+					</form>
+				</div>
+			</div>
+			
+			<div class="container-fluid col-md-4">
+				<canvas id="myChart1"></canvas>
+			</div>
+		</div>
+			<div class="container">
+				<canvas id="myChart2"></canvas>
+			</div>
+			<div class="container">
+				<canvas id="myChart3"></canvas>
+			</div>	
+	</div>
+	
+	<footer class="footer bg-light text-center text-lg-start">
+		<div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+    		© 2021 Copyright Stefan Damian
+  		</div>
+	</footer>
+	
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="crossorigin="anonymous"></script>
+	<script>
+$('#formCountry').submit( function (e) {
+	$("#btnSubmit").attr("disabled", true);
+	$("#btnSubmit").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+	$("#btnSubmit").append(' Loading...');
+	var date_start = new Date($('#startDate').val())
+	var date_stop = new Date($('#stopDate').val())
+	var diff = Math.floor((date_stop.getTime() - date_start.getTime()) / (1000 * 3600 * 24));
+	if (diff > 40){
+		$("#waitingTimeInput").append(`wait time ~${diff} seconds`);
+	}
+});
+
+document.getElementById('startDate').value = "[[${start_date}]]";
+document.getElementById('stopDate').value = "[[${stop_date}]]";
+
+const day_first = Date.parse("[[${start_date}]]");
+const day_last = Date.parse("[[${stop_date}]]");
+
+var day_labels = [];
+
+console.log(day_first);
+console.log(day_last);
+
+let loop = new Date(day_first);
+for(var d = new Date(day_first); d <= day_last; d.setDate(d.getDate() + 1)){
+	console.log(d);
+	let year = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(d);
+	let month = new Intl.DateTimeFormat('en', { month: 'short' }).format(d);
+	let day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(d);
+	day_labels.push(`${day}-${month}-${year}`);
+}
+console.log(day_labels);
+
+
+const data1 = {
+		labels: ['Active Cases', 'Recovered', 'Deaths'],
+		datasets: [
+			{
+				label: 'World Wide Statistics',
+				data: [ [[${active_cases}]] , [[${recovered_cases}]] , [[${total_deaths}]] ],
+				backgroundColor:['#ee2011' ,'#1ee124','#000000'],
+			}
+		]
+};
+const myChart1 = new Chart(document.getElementById('myChart1').getContext('2d'), {
+    type: 'doughnut',
+	data: data1,
+	options: {
+		responsive: true,
+		plugins: {
+			legend: {
+				position: 'top',
+				},
+			title: {
+				display: true,
+				text: '[[${country_name}]] Statistics'
+				}
+			}
+		},
+	});
+
+const data2 = {
+	labels: day_labels ,
+	datasets: [
+		{
+			label: 'New Cases',
+			data: [[${arr_new_cases}]],
+			backgroundColor:['#1ecbe1'],
+		},
+		{
+			label: 'New Deaths',
+			data: [[${arr_new_deaths}]],
+			backgroundColor:['#E1341E'],
+		}
+	]
+};
+const myChart2 = new Chart(document.getElementById('myChart2').getContext('2d'), {
+    type: 'bar',
+	data: data2,
+	options: {
+		responsive: true,
+		plugins: {
+			legend: {
+				position: 'top',
+				},
+			title: {
+				display: true,
+				text: '[[${country_name}]] Statistics'
+				}
+			},
+		scales: {
+			x: {
+				stacked: true,
+				title:{
+					display: true,
+					text: 'Days'
+				}
+			},
+      		y: {
+        		stacked: true
+      			},
+    		}
+		},
+	});
+
+const data3 = {
+	labels: day_labels ,
+	datasets: [
+		{
+			label: 'Active Cases',
+			data: [[${arr_active_cases}]],
+			backgroundColor:['#1ecbe1'],
+		},
+	]
+};
+const myChart3 = new Chart(document.getElementById('myChart3').getContext('2d'), {
+	type: 'line',
+	data: data3,
+	options: {
+		responsive: true,
+		plugins: {
+			legend: {
+				position: 'top',
+			},
+			title: {
+				display: true,
+				text: '[[${country_name}]] Statistics'
+			}
+		},
+		scales: {
+			x: {
+				title:{
+					display: true,
+					text: 'Days'
+				}
+			},
+      		y: {
+        		display: true,
+        		type: 'logarithmic',
+      		}
+    	}
+	},
+});
+	</script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+</body>
+</html>
