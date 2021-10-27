@@ -161,7 +161,6 @@ public class CovidUtilsClient {
         }
         else if(response.code()==429){
             ThreadWithGlobals.couldNotRequest();
-            Thread.sleep(1000);
             return getcountryStats(aName,aDate);
         }
         else{

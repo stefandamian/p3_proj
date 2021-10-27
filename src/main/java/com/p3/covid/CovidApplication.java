@@ -14,7 +14,7 @@ class ThreadWithGlobals extends Thread{
 	public void run(){
 		while(true){
 			try {
-				Thread.sleep(1100);
+				Thread.sleep(1000);
 				if (requestsNumber > 0)
 					requestsNumber--;
 			}catch (InterruptedException e) {

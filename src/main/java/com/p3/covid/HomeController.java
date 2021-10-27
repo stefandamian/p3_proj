@@ -29,8 +29,9 @@ public class HomeController {
     @RequestParam(name="stopDate", required = false) String stopDate, final Model model) throws Exception{
         
         CovidUtilsClient client = new CovidUtilsClient();
+        model.addAttribute("country", country);
+        if (country.equals("all") || country.equals("All")){
 
-        if (country.equals("all")){
             model.addAttribute("country_name", "World Wide");
         }
         else{

@@ -49,7 +49,7 @@
 					<p>deaths: [[${total_deaths}]] </p>
 					<p>new: [[${new_deaths}]] </p>
 					<form method="GET" action="/stats" id="formCountry">
-						<input type="hidden" name="country" th:value="${country_name}">
+						<input type="hidden" name="country" th:value="${country}">
 						<p><label for="startDate">Start Date:</label> <input type="date" name="startDate" id="startDate"></p>
 						<p><label for="stopDate">Stop Date:</label> <input type="date" name="stopDate" id="stopDate"></p>
 						<p><button type="submit" id="btnSubmit" class="btn btn-primary">Reload stats</button></p>
@@ -80,38 +80,40 @@
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="crossorigin="anonymous"></script>
 	<script>
 $('#formCountry').submit( function (e) {
-	$("#btnSubmit").attr("disabled", true);
-	$("#btnSubmit").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
-	$("#btnSubmit").append(' Loading...');
 	var date_start = new Date($('#startDate').val())
 	var date_stop = new Date($('#stopDate').val())
-	var diff = Math.floor((date_stop.getTime() - date_start.getTime()) / (1000 * 3600 * 24));
-	if (diff > 40){
-		$("#waitingTimeInput").append(`wait time ~${diff} seconds`);
+
+	if (date_start > date_stop){
+		alert("Stop date can not be before start date");
+		e.preventDefault();
+	}
+	else{
+		$("#btnSubmit").attr("disabled", true);
+		$("#btnSubmit").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+		$("#btnSubmit").append(' Loading...');
+
+		var diff = Math.floor((date_stop.getTime() - date_start.getTime()) / (1000 * 3600 * 24));
+		if (diff > 40){
+			$("#waitingTimeInput").append(`wait time ~${diff} seconds`);
+		}
 	}
 });
 
-document.getElementById('startDate').value = "[[${start_date}]]";
-document.getElementById('stopDate').value = "[[${stop_date}]]";
+$('#startDate').val("[[${start_date}]]");
+$('#stopDate').val("[[${stop_date}]]");
 
 const day_first = Date.parse("[[${start_date}]]");
 const day_last = Date.parse("[[${stop_date}]]");
 
 var day_labels = [];
 
-console.log(day_first);
-console.log(day_last);
-
 let loop = new Date(day_first);
 for(var d = new Date(day_first); d <= day_last; d.setDate(d.getDate() + 1)){
-	console.log(d);
 	let year = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(d);
 	let month = new Intl.DateTimeFormat('en', { month: 'short' }).format(d);
 	let day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(d);
 	day_labels.push(`${day}-${month}-${year}`);
 }
-console.log(day_labels);
-
 
 const data1 = {
 		labels: ['Active Cases', 'Recovered', 'Deaths'],
