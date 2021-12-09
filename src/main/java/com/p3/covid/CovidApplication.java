@@ -18,8 +18,6 @@ class ThreadWithGlobals extends Thread{
 				if (requestsNumber > 0)
 					requestsNumber--;
 			}catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 	}

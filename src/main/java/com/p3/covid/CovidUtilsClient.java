@@ -16,12 +16,6 @@ class StatsEntry{
     private LocalDate time;
     private Integer values[];
 
-    protected void finalize(){           
-        values = null;
-        country = null;
-        time = null;        
-    }
-
     StatsEntry(JSONObject obj){
         if (obj!=null)
         {
@@ -124,11 +118,11 @@ public class CovidUtilsClient {
             return null;
         return countriesList;
     }
-    public StatsEntry getcountryStats(String aName) throws Exception{
-        return getcountryStats(aName, null);
+    public StatsEntry getCountryStats(String aName) throws Exception{
+        return getCountryStats(aName, null);
     };
 
-    public StatsEntry getcountryStats(String aName, String aDate) throws Exception{
+    public StatsEntry getCountryStats(String aName, String aDate) throws Exception{
         DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         if(aDate != null && LocalDate.parse(aDate, formater).isEqual(LocalDate.now())){
             aDate = null;
@@ -161,7 +155,7 @@ public class CovidUtilsClient {
         }
         else if(response.code()==429){
             ThreadWithGlobals.couldNotRequest();
-            return getcountryStats(aName,aDate);
+            return getCountryStats(aName,aDate);
         }
         else{
             String message = "Error code: " + (response.code());
@@ -170,7 +164,7 @@ public class CovidUtilsClient {
         return null;
     };
 
-    public ArrayList<StatsEntry> getcountryStatsTimeline(String aCountry, String aStartDate, String aStopDate) throws Exception{
+    public ArrayList<StatsEntry> getCountryStatsTimeline(String aCountry, String aStartDate, String aStopDate) throws Exception{
         DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         ArrayList<StatsEntry> arr = new ArrayList<StatsEntry>();
         LocalDate startDate = LocalDate.parse(aStartDate, formater);
@@ -178,7 +172,7 @@ public class CovidUtilsClient {
         LocalDate stopDate = LocalDate.parse(aStopDate, formater);
         System.out.println(stopDate.toString());
         while(stopDate.isAfter(startDate) || stopDate.isEqual(startDate)){
-            StatsEntry entry = getcountryStats(aCountry, startDate.toString());
+            StatsEntry entry = getCountryStats(aCountry, startDate.toString());
             arr.add(entry);
             startDate = startDate.plusDays(1);
         }
