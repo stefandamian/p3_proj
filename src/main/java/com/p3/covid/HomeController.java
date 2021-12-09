@@ -30,19 +30,18 @@ public class HomeController {
         
         CovidUtilsClient client = new CovidUtilsClient();
         model.addAttribute("country", country);
-        if (country.equals("all") || country.equals("All")){
-
+        if (country.equalsIgnoreCase("all")){
             model.addAttribute("country_name", "World Wide");
         }
         else{
             List<String> valid_countries = client.getCountries();
-            if(!valid_countries.stream().anyMatch(country::equalsIgnoreCase)){
+            if(valid_countries.stream().noneMatch(country::equalsIgnoreCase)){
                 return "index";
             }
             model.addAttribute("country_name", country);
         }        
         
-        StatsEntry var = client.getcountryStats(country);
+        StatsEntry var = client.getCountryStats(country);
         Integer totalCases = var.getTotalCases();
         Integer newCases = var.getNewCases();
         Integer criticalCases = var.getCriticalCases();
@@ -66,11 +65,11 @@ public class HomeController {
             stopDate = LocalDate.now().toString();
         }
 
-        ArrayList<StatsEntry> arr = client.getcountryStatsTimeline(country, startDate, stopDate);
-        ArrayList<String> days = new ArrayList<String>();
-        ArrayList<Integer> arrNewCases = new ArrayList<Integer>();
-        ArrayList<Integer> arrNewDeaths = new ArrayList<Integer>();
-        ArrayList<Integer> arrActiveCases = new ArrayList<Integer>();
+        ArrayList<StatsEntry> arr = client.getCountryStatsTimeline(country, startDate, stopDate);
+        ArrayList<String> days = new ArrayList<>();
+        ArrayList<Integer> arrNewCases = new ArrayList<>();
+        ArrayList<Integer> arrNewDeaths = new ArrayList<>();
+        ArrayList<Integer> arrActiveCases = new ArrayList<>();
         DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyyMMdd");
         Integer number = 0;
         for (StatsEntry entry : arr) {

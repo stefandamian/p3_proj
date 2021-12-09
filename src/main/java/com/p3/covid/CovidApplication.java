@@ -17,7 +17,7 @@ class ThreadWithGlobals extends Thread{
 				Thread.sleep(1000);
 				if (requestsNumber > 0)
 					requestsNumber--;
-			}catch (InterruptedException e) {
+			}catch (InterruptedException ignored) {
 			}
 		}
 	}
@@ -31,7 +31,7 @@ class ThreadWithGlobals extends Thread{
 	}
 
 	public static boolean canRequest(){
-		return requestsNumber < 60;
+		return requestsNumber <= 45;
 	}
 
 }

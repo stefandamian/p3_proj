@@ -3,6 +3,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,7 +16,7 @@ import okhttp3.Response;
 class StatsEntry{
     private String country;
     private LocalDate time;
-    private Integer values[];
+    private int[] values;
 
     StatsEntry(JSONObject obj){
         if (obj!=null)
@@ -23,7 +25,7 @@ class StatsEntry{
             country = obj.getString("country");
             DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             time = LocalDate.parse(obj.getString("day"), formater);
-            values = new Integer[7];
+            values = new int[7];
 
             try {
                 values[0] = Integer.parseInt((obj.getJSONObject("cases")).getString("new"));
@@ -73,7 +75,7 @@ class StatsEntry{
 }
 
 public class CovidUtilsClient {
-    private OkHttpClient client;
+    private final OkHttpClient client;
     //private final static Integer SLEEP_TIME = 1100;
 
     CovidUtilsClient(){
@@ -82,7 +84,7 @@ public class CovidUtilsClient {
 
     public List<String> getCountries() throws Exception{
 
-        List<String> countriesList = new ArrayList<String>();
+        List<String> countriesList = new ArrayList<>();
 
         Request request = new Request.Builder()
             .url("https://covid-193.p.rapidapi.com/countries")
@@ -90,14 +92,14 @@ public class CovidUtilsClient {
             .addHeader("x-rapidapi-host", "covid-193.p.rapidapi.com")
             .addHeader("x-rapidapi-key", "c028881ebemshbb6b719df87987bp1dc980jsna096a9b38718")
             .build();
-        Response response = null;
+
         while(!ThreadWithGlobals.canRequest()){
             Thread.sleep(100);
         }
-        response = client.newCall(request).execute();
+        Response response = client.newCall(request).execute();
         ThreadWithGlobals.incrementUsedRequests();
         if (response.code() == 200){
-            JSONObject obj = new JSONObject(response.body().string());
+            JSONObject obj = new JSONObject(Objects.requireNonNull(response.body()).string());
             if(obj.getInt("results") > 0){
                 JSONArray arr = obj.getJSONArray("response");
                 for(int i=0;i<arr.length();i++){
@@ -120,11 +122,11 @@ public class CovidUtilsClient {
     }
     public StatsEntry getCountryStats(String aName) throws Exception{
         return getCountryStats(aName, null);
-    };
+    }
 
     public StatsEntry getCountryStats(String aName, String aDate) throws Exception{
-        DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        if(aDate != null && LocalDate.parse(aDate, formater).isEqual(LocalDate.now())){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        if(aDate != null && LocalDate.parse(aDate, formatter).isEqual(LocalDate.now())){
             aDate = null;
         }
         String URL = "https://covid-193.p.rapidapi.com/";
@@ -146,11 +148,10 @@ public class CovidUtilsClient {
         Response response = client.newCall(request).execute();
         ThreadWithGlobals.incrementUsedRequests();
         if (response.code() == 200){
-            JSONObject obj = new JSONObject(response.body().string());
+            JSONObject obj = new JSONObject(Objects.requireNonNull(response.body()).string());
             if(obj.getInt("results") > 0){
                 obj = obj.getJSONArray("response").getJSONObject(0);
-                StatsEntry entry = new StatsEntry(obj);
-                return entry;
+                return new StatsEntry(obj);
             }
         }
         else if(response.code()==429){
@@ -162,14 +163,14 @@ public class CovidUtilsClient {
             throw new Exception(message);
         }
         return null;
-    };
+    }
 
     public ArrayList<StatsEntry> getCountryStatsTimeline(String aCountry, String aStartDate, String aStopDate) throws Exception{
-        DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        ArrayList<StatsEntry> arr = new ArrayList<StatsEntry>();
-        LocalDate startDate = LocalDate.parse(aStartDate, formater);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        ArrayList<StatsEntry> arr = new ArrayList<>();
+        LocalDate startDate = LocalDate.parse(aStartDate, formatter);
         System.out.println(startDate.toString());
-        LocalDate stopDate = LocalDate.parse(aStopDate, formater);
+        LocalDate stopDate = LocalDate.parse(aStopDate, formatter);
         System.out.println(stopDate.toString());
         while(stopDate.isAfter(startDate) || stopDate.isEqual(startDate)){
             StatsEntry entry = getCountryStats(aCountry, startDate.toString());
